@@ -55,12 +55,21 @@ G_Tot = par_comp(G_M, G_R);
 
 G_N = partial_obs(G_Tot);
 
-%% Build the observer
+%% Build the observer (for non-observable case)
 
-G_obs = observer(G_N);
+G_obs = observer(G_Tot);
 
+%sum of each column, for each row
+row_sum = sum(G_obs.X);
+
+%sum of each row, for each column
+col_sum = sum(G_obs.X')';
 
 [U,S,V] = svd(G_obs.X);
+
+sing_values = diag(S(1:4,1:4));
+
+% 
 
 %% Explore the observer automaton
 
@@ -99,7 +108,7 @@ G_M2.x0 = "Rm1";
 
 G_Tot2 = par_comp(G_M2, G_R);
 G_N2 = partial_obs(G_Tot2);
-G_obs2 = observer(G_N2);
+G_obs2 = observer(G_Tot2);
 
 [U2,S2,V2] = svd(G_obs2.X); % there are singular eigs in S2
 

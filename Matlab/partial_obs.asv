@@ -48,8 +48,7 @@ end
 orig_length = height(G_out.X);
 G_out.X = [G_out.X; add_state];
 
-% add the new possible transitions:
-add_state = string(add_state);
+% add the new possible transitions
 
 new_len = height(G_out.X);
 
@@ -66,7 +65,7 @@ for i=1:length(trans_f)
     offset = find(contains(add_state, G_out.X(G_out.f(trans_f(i),1))));
     
     G_out.f = [G_out.f; 
-        [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'r')] ];
+        [orig_length+offset G_out.f(trans(i),2) find(G_out.E == 'r')] ];
         
 end
 
