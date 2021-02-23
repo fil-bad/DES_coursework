@@ -682,8 +682,9 @@ initial state
 \end_layout
 
 \begin_layout Standard
-Now we are ready to read through the code, even if it is suggested to download
- it from GitHub and visualize it through a proper text editor: 
+Now we are ready to read through the code, although it is suggested to be
+ downloaded from GitHub and being visualized through a proper text editor:
+ 
 \end_layout
 
 \begin_layout Standard
@@ -1285,7 +1286,8 @@ r
 \end_layout
 
 \begin_layout Standard
-With some patience, it is even feasible to draw the entire automaton:
+Notice that with some patience, it is still feasible to draw the entire
+ automaton:
 \end_layout
 
 \begin_layout Standard
@@ -1340,19 +1342,19 @@ Modeling partial observability
 As stated in the assessment, the robot is unaware of its heading; however,
  we can assume that its location it is still available.
  For this reason, our initial state is not completely known, as we could
- be in a room with any orientation, and if the next event is a rotation
- one, we'll continue to stay in the same one.
+ be in a specific room but with any orientation, and if the next event is
+ a rotation one, we'll continue to stay in the same uncertain state.
  Only when an event 
 \emph on
 m
 \emph default
  happens, the robot moves in another room, and since the robot can move
  only in the looking-forward direction, from that moment we'll know the
- direction of the robot, and this information will not be lose.
+ direction of the robot, and this information will not be lost.
 \end_layout
 
 \begin_layout Standard
-For this reason, the matlab function that generates the new automaton has
+For this reason, the Matlab function that generates the new automaton has
  two main goals:
 \end_layout
 
@@ -1366,8 +1368,8 @@ Substitute every transition in the parallel automaton with the new set of
 \end_layout
 
 \begin_layout Enumerate
-Add the new possible initial state for this automaton, as well as every
- transition that might occur.
+Add the new possible initial states for this automaton, as well as all the
+ transitions that might occur from them.
 \end_layout
 
 \begin_layout Standard
@@ -1894,9 +1896,575 @@ Unlike the previous point, neither position nor heading is available for
 
 ).
  Then, an algorithm is developed in order to compute every reachable state,
- for every enabled event, eliminating all the state that are no more reachable,
- and proceeding in a parallel in-depth search until we end up in single
+ for every enabled event, eliminating all the state that are no longer reachable
+, and proceeding in a parallel in-depth search until we end up in single
  states (as we'll see later on).
+\end_layout
+
+\begin_layout Standard
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+newgeometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Box Doublebox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+\noindent
+
+\size tiny
+\begin_inset listings
+lstparams "language=Matlab,numbers=left,stepnumber=10,basicstyle={\scriptsize},showstringspaces=false,tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\size tiny
+function G_out = observer(G_in) 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out = struct("E",0, "X",0, "f",0, "x0",0);
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% we have to first convert the event and transitions lists
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_in = convert2parobs(G_in); 
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out.E = G_in.E;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% as suggested the whole initial state is given by the vector of all ones
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% notice that the state will be expressed as a row, so that the "vector"
+ of
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% states will always be a column vector.
+ 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out.f = {};
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out.x0 = ones(1,height(G_in.X));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out.X = G_out.x0; % the first defined state
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+x_new = G_out.x0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+while height(x_new) > 0
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	x_til = x_new(1,:); % take the first state,
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+    x_new(1,:) = [];   % and remove it from the queue of states
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+		for e = 1:length(G_in.E) % compute the reachability
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			state_index = find (G_in.f(:,3) == e);  % find all the states with
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+													% the active event 'e'
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			x_next = zeros(1,height(G_in.X));
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			for x = 1:length(state_index)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+				x_tmp = G_in.f(state_index(x),1); % starting x state
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+				if (x_til(x_tmp) == 1)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+                	% if the Gamma is referred to a state we're considering
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+                	x_next(G_in.f(state_index(x),2)) = 1;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+					% then we consider the f(x,e) as a valid transition
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+            	end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			% once found the new state
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			if any(x_next) % if it is a valid state
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+				% we define the transition map
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+				G_out.f(end+1,:) = {x_til, x_next, e};
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+				if ~ismember(x_next, G_out.X,'rows)	 % if the state does not
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+														% exist yet
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+                G_out.X = [G_out.X; x_next];	% add it to the list
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+												% of all states
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+                x_new = [x_new; x_next];     % add at the end of the queue
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+			end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+		end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% implement transitions, based on the order of the new states 
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+f_tmp = zeros(height(G_out.f),width(G_out.f));
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+for h=1:height(G_out.f)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	f_tmp(h,1) = find (ismember(G_out.X, cell2mat(G_out.f(h,1)),'rows'));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	f_tmp(h,2) = find (ismember(G_out.X, cell2mat(G_out.f(h,2)),'rows'));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+    f_tmp(h,3) = cell2mat(G_out.f(h,3));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_out.f = f_tmp;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+function G_po = convert2parobs(G)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% In this sub-function, we convert the list of event and transition to the
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% one that we can really observe ('m' and 'r').
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_po = G;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+new_e = ['m','r']';
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+G_po.E = new_e;
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% now, we determine the position of events to be substituted
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+e2remove = ['n','s','e','w']';
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+e_index = zeros(4,1);
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+for e=1:length(e2remove)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	e_index(e) = find( G.E == e2remove(e));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+r_old = find( G.E == 'r');
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+% finally, change the indexes of events
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+for i=1:height(G.f)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+	if ( ismember(G.f(i,3),e_index) )
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+        G_po.f(i,3) = 1;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+    elseif ( ismember(G.f(i,3),r_old) )
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+        G_po.f(i,3) = 2;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+    end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size tiny
+end
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\noindent
+\begin_inset ERT
+status open
+
+\begin_layout Plain Layout
+
+
+\backslash
+restoregeometry
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Newpage pagebreak
+\end_inset
+
+
 \end_layout
 
 \begin_layout Standard
@@ -1904,8 +2472,12 @@ Now, answering to all the point asked in the assignment:
 \end_layout
 
 \begin_layout Enumerate
-There are 77 states for the observer automaton, which can be listed as (notice:
- every state is made by a row:
+There are 77 states for the observer automaton, which can be listed as a
+ matrix where each state is made by a row:
+\begin_inset Newline newline
+\end_inset
+
+
 \size tiny
 
 \begin_inset Formula 
@@ -1997,30 +2569,36 @@ X=\left(\begin{array}{cccccccccccccccccccccccccccc}
 \end_layout
 
 \begin_layout Enumerate
-To provide a better verification tool, the sum of the row and column, as
- well the first 4 singular values are provided.
- As we can see, two important results can be obtained by these tools:
+To provide a more readable verification tool, the sum of the row and column,
+ as well the first 4 singular values are provided.
+ As we can see, two important results can be obtained by their values:
 \end_layout
 
 \begin_deeper
 \begin_layout Enumerate
 the matrix S is a tall matrix with all the values on the main diagonal greater
- than zero.
+ than zero (actually 
+\begin_inset Formula $\geq1$
+\end_inset
+
+).
 \end_layout
 
 \begin_layout Enumerate
-with the 
+Thanks to the 
 \emph on
 rows
 \emph default
- vector, we are looking for each state between how many of them we are uncertian
- about robot position; as we can see, there are 28 ones in this vector,
- that means that, following the appropriate word, it is possible to know
- precisely both location and orientation of the robot.
+ vector, we know for each state how many of them have precise information
+ about robot position and heading; as we can see, there are 28 ones in this
+ vector, that means that, after an appropriate word happens, it is possible
+ to end up in a deterministic state (it is obvious that just spinning would
+ not improve our knowledge on position).
 \end_layout
 
 \begin_layout Standard
-Both results will differ from the ones given in the points 6 of the coursework.
+It is important to notice that both results will be different from the ones
+ obtained in the nex point of the coursework.
 \end_layout
 
 \begin_layout Standard
@@ -2124,8 +2702,8 @@ Rows=\left(\begin{array}{c}
 
 \end_deeper
 \begin_layout Enumerate
-In order to compute every possible transition given by a word, a new matlab
- function has been formulated:
+In order to compute every possible transition given by a word, a new Matlab
+ function has been implemented:
 \begin_inset Newline newline
 \end_inset
 
@@ -2160,19 +2738,16 @@ status open
 
 \begin_layout Plain Layout
 
-\size scriptsize
 function x_final = explore_obs(G,w)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 % Given any word and an observer automaton from an unknown state, we find
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 % out in which state we end up, starting from the completely unknown state.
 \end_layout
 
@@ -2182,31 +2757,26 @@ function x_final = explore_obs(G,w)
 
 \begin_layout Plain Layout
 
-\size scriptsize
 if isempty(w)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
     x_final = G.x0;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
     return;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 x_final = find(ismember(G.X,G.x0,'rows')); % initial state position.
 \end_layout
 
@@ -2216,19 +2786,16 @@ x_final = find(ismember(G.X,G.x0,'rows')); % initial state position.
 
 \begin_layout Plain Layout
 
-\size scriptsize
 for e=1:length(w)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 	e_num = find (G.E == w(e));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 	f_row = find(ismember(G.f(:,[1 3]), [x_final e_num], 'rows'));
 \end_layout
 
@@ -2238,37 +2805,31 @@ for e=1:length(w)
 
 \begin_layout Plain Layout
 
-\size scriptsize
 	if isempty(f_row) % our word has led us to an illegal state
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 		x_final = NaN;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 		return;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 	end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 	x_final = G.f(f_row,2);
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 end
 \end_layout
 
@@ -2278,13 +2839,11 @@ end
 
 \begin_layout Plain Layout
 
-\size scriptsize
 % once found the final state of the word, we have to convert to the actual
 \end_layout
 
 \begin_layout Plain Layout
 
-\size scriptsize
 % value of the state.
 \end_layout
 
@@ -2294,7 +2853,6 @@ end
 
 \begin_layout Plain Layout
 
-\size scriptsize
 x_final = G.X(x_final,:);
 \end_layout
 
@@ -2304,7 +2862,6 @@ x_final = G.X(x_final,:);
 
 \begin_layout Plain Layout
 
-\size scriptsize
 end
 \end_layout
 
@@ -2330,8 +2887,8 @@ In this way, we can compute where we could possibly end up.
 \begin_inset Formula $w="mrrmrmrrmrm"$
 \end_inset
 
-– that means only one 1 is present in the row state vector–, we can match
- it in the parallel automaton, and the state is 
+–that means only one 1 is present in the row state vector of the observer–,
+ we can match it in the parallel automaton, and the resulting state is 
 \begin_inset Formula $x=f\left(x_{0},w\right)="Rm2N"$
 \end_inset
 
@@ -2339,7 +2896,7 @@ In this way, we can compute where we could possibly end up.
 \end_layout
 
 \begin_layout Enumerate
-As shown in the code abve, in order to find the final state, it is sufficient
+As shown in the code above, in order to find the final state, it is sufficient
  use the extension of 
 \emph on
 f
@@ -2348,493 +2905,7 @@ f
 \begin_inset Formula $f\left(x,se\right)\coloneqq f\left(f\left(x,s\right),e\right)$
 \end_inset
 
-, looking to the transition matrix of the observer automaton.
-\end_layout
-
-\begin_layout Standard
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-newgeometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Box Doublebox
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status collapsed
-
-\begin_layout Plain Layout
-\noindent
-\begin_inset listings
-lstparams "language=Matlab,numbers=left,stepnumber=10,basicstyle={\scriptsize},showstringspaces=false,tabsize=4"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-function G_out = observer(G_in) 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out = struct("E",0, "X",0, "f",0, "x0",0);
-\end_layout
-
-\begin_layout Plain Layout
-
-% we have to first convert the event and transitions lists
-\end_layout
-
-\begin_layout Plain Layout
-
-G_in = convert2parobs(G_in); 
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out.E = G_in.E;
-\end_layout
-
-\begin_layout Plain Layout
-
-% as suggested the whole initial state is given by the vector of all ones
-\end_layout
-
-\begin_layout Plain Layout
-
-% notice that the state will be expressed as a row, so that the "vector"
- of
-\end_layout
-
-\begin_layout Plain Layout
-
-% states will always be a column vector.
- 
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out.f = {};
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out.x0 = ones(1,height(G_in.X));
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out.X = G_out.x0; % the first defined state
-\end_layout
-
-\begin_layout Plain Layout
-
-x_new = G_out.x0;
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-while height(x_new) > 0
-\end_layout
-
-\begin_layout Plain Layout
-
-	x_til = x_new(1,:); % take the first state,
-\end_layout
-
-\begin_layout Plain Layout
-
-    x_new(1,:) = [];   % and remove it from the queue of states
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-		for e = 1:length(G_in.E) % compute the reachability
-\end_layout
-
-\begin_layout Plain Layout
-
-			state_index = find (G_in.f(:,3) == e);  % find all the states with
-\end_layout
-
-\begin_layout Plain Layout
-
-													% the active event 'e'
-\end_layout
-
-\begin_layout Plain Layout
-
-			x_next = zeros(1,height(G_in.X));
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-			for x = 1:length(state_index)
-\end_layout
-
-\begin_layout Plain Layout
-
-				x_tmp = G_in.f(state_index(x),1); % starting x state
-\end_layout
-
-\begin_layout Plain Layout
-
-				if (x_til(x_tmp) == 1)
-\end_layout
-
-\begin_layout Plain Layout
-
-                	% if the Gamma is referred to a state we're considering
-\end_layout
-
-\begin_layout Plain Layout
-
-                	x_next(G_in.f(state_index(x),2)) = 1;
-\end_layout
-
-\begin_layout Plain Layout
-
-					% then we consider the f(x,e) as a valid transition
-\end_layout
-
-\begin_layout Plain Layout
-
-            	end
-\end_layout
-
-\begin_layout Plain Layout
-
-			end
-\end_layout
-
-\begin_layout Plain Layout
-
-			% once found the new state
-\end_layout
-
-\begin_layout Plain Layout
-
-			if any(x_next) % if it is a valid state
-\end_layout
-
-\begin_layout Plain Layout
-
-				% we define the transition map
-\end_layout
-
-\begin_layout Plain Layout
-
-				G_out.f(end+1,:) = {x_til, x_next, e};
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-				if ~ismember(x_next, G_out.X,'rows)	 % if the state does not
-\end_layout
-
-\begin_layout Plain Layout
-
-														% exist yet
-\end_layout
-
-\begin_layout Plain Layout
-
-                G_out.X = [G_out.X; x_next];	% add it to the list
-\end_layout
-
-\begin_layout Plain Layout
-
-												% of all states
-\end_layout
-
-\begin_layout Plain Layout
-
-                x_new = [x_new; x_next];     % add at the end of the queue
-\end_layout
-
-\begin_layout Plain Layout
-
-			end
-\end_layout
-
-\begin_layout Plain Layout
-
-		end
-\end_layout
-
-\begin_layout Plain Layout
-
-	end
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-% implement transitions, based on the order of the new states 
-\end_layout
-
-\begin_layout Plain Layout
-
-f_tmp = zeros(height(G_out.f),width(G_out.f));
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-for h=1:height(G_out.f)
-\end_layout
-
-\begin_layout Plain Layout
-
-	f_tmp(h,1) = find (ismember(G_out.X, cell2mat(G_out.f(h,1)),'rows'));
-\end_layout
-
-\begin_layout Plain Layout
-
-	f_tmp(h,2) = find (ismember(G_out.X, cell2mat(G_out.f(h,2)),'rows'));
-\end_layout
-
-\begin_layout Plain Layout
-
-    f_tmp(h,3) = cell2mat(G_out.f(h,3));
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-G_out.f = f_tmp;
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-function G_po = convert2parobs(G)
-\end_layout
-
-\begin_layout Plain Layout
-
-% In this sub-function, we convert the list of event and transition to the
-\end_layout
-
-\begin_layout Plain Layout
-
-% one that we can really observe ('m' and 'r').
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-G_po = G;
-\end_layout
-
-\begin_layout Plain Layout
-
-new_e = ['m','r']';
-\end_layout
-
-\begin_layout Plain Layout
-
-G_po.E = new_e;
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-% now, we determine the position of events to be substituted
-\end_layout
-
-\begin_layout Plain Layout
-
-e2remove = ['n','s','e','w']';
-\end_layout
-
-\begin_layout Plain Layout
-
-e_index = zeros(4,1);
-\end_layout
-
-\begin_layout Plain Layout
-
-for e=1:length(e2remove)
-\end_layout
-
-\begin_layout Plain Layout
-
-	e_index(e) = find( G.E == e2remove(e));
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-r_old = find( G.E == 'r');
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-% finally, change the indexes of events
-\end_layout
-
-\begin_layout Plain Layout
-
-for i=1:height(G.f)
-\end_layout
-
-\begin_layout Plain Layout
-
-	if ( ismember(G.f(i,3),e_index) )
-\end_layout
-
-\begin_layout Plain Layout
-
-        G_po.f(i,3) = 1;
-\end_layout
-
-\begin_layout Plain Layout
-
-    elseif ( ismember(G.f(i,3),r_old) )
-\end_layout
-
-\begin_layout Plain Layout
-
-        G_po.f(i,3) = 2;
-\end_layout
-
-\begin_layout Plain Layout
-
-    end
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\noindent
-\begin_inset ERT
-status open
-
-\begin_layout Plain Layout
-
-
-\backslash
-restoregeometry
-\end_layout
-
-\end_inset
-
-
+, looking to the column of the transition matrix of the observer automaton.
 \end_layout
 
 \begin_layout Section
@@ -2843,27 +2914,31 @@ Question: Deterministic Interpretation
 
 \begin_layout Standard
 As analysed above, due to the fact that there are 28 single states, we can
- affirm that we are able to reconstruct the exact position of the robot,
- that is because the map has no simmetry; in fact, once the map it is modified,
- if we compute the same tools used before (row and column sum vectors, singular
- values), we can see that there are not any single value state; instead,
- we have 
+ affirm that we are able to reconstruct the exact position of the robot;
+ this is due to the fact that the map has no symmetry.
+ In fact, once the map it is modified, if we compute the same tools used
+ before (row and column sum vectors, singular values), we can see that there
+ are no single value states; instead, we have 
 \begin_inset Formula $\nicefrac{\left|X\right|}{2}$
 \end_inset
 
- double state, due to the fact that the map is simmetric, so if we are only
- able to observe a movement and a rotation without knowing toward where
- we are moving, we have a specular situation along the horizontal median
- line of the map, it will be impossible to reconstruct our position and
- heading (we will always have uncertainty between at least two states).
+ double state because of the symmetry of the map.
+ 
 \end_layout
 
 \begin_layout Standard
-Moreover, half of the singular values of the 
+For this reason, as we are only able to observe a movement and a rotation
+ without knowing towards where we are moving, we have a specular behaviour
+ along the horizontal median line of the map, and it will be impossible
+ to reconstruct our position and heading (we will always have uncertainty
+ between at least two states).
+ One of the signs of this behaviour can be found in the singular matrix
+ 
 \emph on
 S
 \emph default
- matrix are close to zero so it is ill-conditioned.
+, where the last half of the diagonal values are really close to zero, and
+ thus it is ill-conditioned.
 \end_layout
 
 \begin_layout Standard
