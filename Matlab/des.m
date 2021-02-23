@@ -110,7 +110,17 @@ G_Tot2 = par_comp(G_M2, G_R);
 G_N2 = partial_obs(G_Tot2);
 G_obs2 = observer(G_Tot2);
 
+%sum of each column, for each row
+row_sum2 = sum(G_obs2.X);
+
+%sum of each row, for each column
+col_sum2 = sum(G_obs2.X')';
+
+
 [U2,S2,V2] = svd(G_obs2.X); % there are singular eigs in S2
+
+sing_values2 = diag(S2(1:4,1:4));
+
 
 x_final2 = explore_obs(G_obs2, word);    
 

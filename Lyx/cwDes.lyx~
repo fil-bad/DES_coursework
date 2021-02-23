@@ -726,7 +726,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -1998,9 +1998,39 @@ X=\left(\begin{array}{cccccccccccccccccccccccccccc}
 
 \begin_layout Enumerate
 To provide a better verification tool, the sum of the row and column, as
- well the first 4 singular values are provided:
+ well the first 4 singular values are provided.
+ As we can see, two important results can be obtained by these tools:
+\end_layout
+
+\begin_deeper
+\begin_layout Enumerate
+the matrix S is a tall matrix with all the values on the main diagonal greater
+ than zero.
+\end_layout
+
+\begin_layout Enumerate
+with the 
+\emph on
+rows
+\emph default
+ vector, we are looking for each state between how many of them we are uncertian
+ about robot position; as we can see, there are 28 ones in this vector,
+ that means that, following the appropriate word, it is possible to know
+ precisely both location and orientation of the robot.
+\end_layout
+
+\begin_layout Standard
+Both results will differ from the ones given in the points 6 of the coursework.
+\end_layout
+
+\begin_layout Standard
+
+\size tiny
 \begin_inset Formula 
-\[
+\begin{multline*}
+Cols=\left(\begin{array}{cccccccccccccccccccccccccccc}
+5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7\end{array}\right)\\
+\begin{array}{cc}
 Rows=\left(\begin{array}{c}
 28\\
 12\\
@@ -2079,18 +2109,246 @@ Rows=\left(\begin{array}{c}
 2\\
 2\\
 2
-\end{array}\right)Cols=\left(\begin{array}{cccccccccccccccccccccccccccc}
-5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7 & 5 & 9 & 13 & 10 & 8 & 5 & 7\end{array}\right)Sing\_vals=\left(\begin{array}{c}
+\end{array}\right) & Sing\_vals=\left(\begin{array}{c}
 8.2219\\
 4.7713\\
 4.2310\\
 4.2310
-\end{array}\right)
-\]
+\end{array}\right)\end{array}\\
+\end{multline*}
 
 \end_inset
 
 
+\end_layout
+
+\end_deeper
+\begin_layout Enumerate
+In order to compute every possible transition given by a word, a new matlab
+ function has been formulated:
+\begin_inset Newline newline
+\end_inset
+
+
+\size scriptsize
+
+\begin_inset Box Doublebox
+position "t"
+hor_pos "c"
+has_inner_box 1
+inner_pos "t"
+use_parbox 0
+use_makebox 0
+width "100col%"
+special "none"
+height "1in"
+height_special "totalheight"
+thickness "0.4pt"
+separation "3pt"
+shadowsize "4pt"
+framecolor "black"
+backgroundcolor "none"
+status open
+
+\begin_layout Plain Layout
+
+\size scriptsize
+\begin_inset listings
+lstparams "language=Matlab,numbers=left,stepnumber=5,basicstyle={\scriptsize},tabsize=4"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+\size scriptsize
+function x_final = explore_obs(G,w)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+% Given any word and an observer automaton from an unknown state, we find
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+% out in which state we end up, starting from the completely unknown state.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+if isempty(w)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+    x_final = G.x0;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+    return;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+x_final = find(ismember(G.X,G.x0,'rows')); % initial state position.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+for e=1:length(w)
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+	e_num = find (G.E == w(e));
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+	f_row = find(ismember(G.f(:,[1 3]), [x_final e_num], 'rows'));
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+	if isempty(f_row) % our word has led us to an illegal state
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+		x_final = NaN;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+		return;
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+	end
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+	x_final = G.f(f_row,2);
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+% once found the final state of the word, we have to convert to the actual
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+% value of the state.
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+x_final = G.X(x_final,:);
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+\size scriptsize
+end
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\size default
+
+\begin_inset VSpace defskip
+\end_inset
+
+In this way, we can compute where we could possibly end up.
+ In our case, since the state is certain after the word 
+\begin_inset Formula $w="mrrmrmrrmrm"$
+\end_inset
+
+– that means only one 1 is present in the row state vector–, we can match
+ it in the parallel automaton, and the state is 
+\begin_inset Formula $x=f\left(x_{0},w\right)="Rm2N"$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Enumerate
+As shown in the code abve, in order to find the final state, it is sufficient
+ use the extension of 
+\emph on
+f
+\emph default
+ to words, such that 
+\begin_inset Formula $f\left(x,se\right)\coloneqq f\left(f\left(x,s\right),e\right)$
+\end_inset
+
+, looking to the transition matrix of the observer automaton.
 \end_layout
 
 \begin_layout Standard
@@ -2126,7 +2384,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \noindent
@@ -2580,1179 +2838,23 @@ restoregeometry
 \end_layout
 
 \begin_layout Section
-OLD WORK
+Question: Deterministic Interpretation 
 \end_layout
 
 \begin_layout Standard
-Rewriting the input according to state space representation:
-\begin_inset Formula 
-\[
-u_{f}=\begin{cases}
-u_{1}=-\dot{\theta}-(\theta-\theta_{d})\\
-u_{2}=-\dot{r}-(r-r_{d})
-\end{cases}\rightarrow\begin{cases}
-u_{1}=-x_{2}-(x_{1}-\theta_{d})\\
-u_{2}=-x_{4}-(x_{3}-r_{d})
-\end{cases}\overrightarrow{_{\theta_{d}=0,r_{d}=0}}\begin{cases}
-u_{1}=-x_{2}-x_{1}\\
-u_{2}=-x_{4}-x_{3}
-\end{cases}
-\]
-
-\end_inset
-
-Leads the expression 
-\begin_inset Formula $\dot{x}=f(x,u_{f})$
-\end_inset
-
- to be: 
-\begin_inset Formula 
-\[
-\dot{x}=\begin{bmatrix}x_{2}\\
-\frac{-x_{2}-x_{1}-2x_{3}x_{4}x_{2}}{(x_{3}^{2}+1)}\\
-x_{4}\\
--x_{4}-x_{3}+x_{3}x_{2}^{2}
-\end{bmatrix}
-\]
-
-\end_inset
-
-Again, as suggested by the assignment, we can modify the Lyapunov function
- adding the potential energy (that is expression of 
-\begin_inset Formula $\frac{1}{2}\theta^{2}$
-\end_inset
-
- and 
-\begin_inset Formula $\frac{1}{2}r^{2}$
-\end_inset
-
-, function of position), so that it becomes: 
-\begin_inset Formula 
-\[
-\widetilde{V}(x)=\frac{1}{2}(x_{3}^{2}+1)x_{2}^{2}+\frac{1}{2}x_{4}^{2}+\frac{1}{2}x_{1}^{2}+\frac{1}{2}x_{3}^{2}
-\]
-
-\end_inset
-
-Note that in this way, the 
-\begin_inset Formula $\widetilde{V}(x)$
-\end_inset
-
- is positive 
-\emph on
-definite
-\emph default
- ( 
-\begin_inset Formula $\widetilde{V}(x)=0\Leftrightarrow x=0$
-\end_inset
-
- ), and radially unbounded.
- By calculating the function:
-\begin_inset Formula 
-\begin{align*}
-\dot{\widetilde{V}}(x) & =\frac{\partial V(x)}{\partial x}\cdot f(x)=\begin{bmatrix}x_{1} & x_{2}(x_{3}^{2}+1) & x_{3}(x_{2}^{2}+1) & x_{4}\end{bmatrix}\begin{bmatrix}x_{2}\\
-\frac{-x_{2}-x_{1}-2x_{3}x_{4}x_{2}}{(x_{3}^{2}+1)}\\
-x_{4}\\
--x_{4}-x_{3}+x_{3}x_{2}^{2}
-\end{bmatrix}=\\
- & =x_{1}x_{2}-x_{2}^{2}-x_{1}x_{2}-2x_{3}x_{4}x_{2}^{2}+x_{3}x_{2}^{2}x_{4}+x_{3}x_{4}-x_{4}^{2}-x_{4}x_{3}+x_{4}x_{3}x_{2}^{2}=\\
- & =-x_{2}^{2}-x_{4}^{2}\boldsymbol{\boldsymbol{\leq}}-(\delta_{1}+\epsilon_{2})\begin{bmatrix}x_{2}+x_{1} & x_{4}+x_{3}\end{bmatrix}\begin{bmatrix}x_{2}+x_{1}\\
-x_{4}+x_{3}
-\end{bmatrix}-(\delta_{2}+\epsilon_{1})\begin{bmatrix}x_{2}\\
-x_{4}
-\end{bmatrix}\begin{bmatrix}x_{2} & x_{4}\end{bmatrix}\boldsymbol{\leq}0
-\end{align*}
-
-\end_inset
-
-At this point we can make some considerations about the feedback system;
- in fact it can be rewritten as a 
-\emph on
-MIMO linear system
-\emph default
-, where:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Formula 
-\[
-\begin{array}{cccc}
-A=\begin{bmatrix}0 & 0\\
-0 & 0
-\end{bmatrix} & B=\begin{bmatrix}1 & 0\\
-0 & 1
-\end{bmatrix} & C=\begin{bmatrix}1 & 0\\
-0 & 1
-\end{bmatrix} & D=\begin{bmatrix}1 & 0\\
-0 & 1
-\end{bmatrix}\end{array}
-\]
-
-\end_inset
-
-however, since the variables are completely decoupled, it can be analyzed
- as two parallel SISO systems (with regard to 
-\begin_inset Formula $\theta$
-\end_inset
-
- and 
-\begin_inset Formula $r$
-\end_inset
-
- respectively), with 
-\begin_inset Formula 
-\[
-A_{1}=0,B_{1}=1,C_{1}=1,D_{1}=1
-\]
-
-\end_inset
-
- as matrices and where each one is 
-\emph on
-strictly input passive
-\emph default
-, as their transfer function 
-\begin_inset Formula $G(s)=C(sI-A)^{-1}B+D$
-\end_inset
-
- verify the propriety 
-\begin_inset Formula $Re\left\{ G(s)\right\} =1\boldsymbol{>}0,\forall s$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-For this reason, we can choose as coefficients: 
-\begin_inset Formula 
-\[
-\delta_{1}=\epsilon_{2}=\epsilon_{1}=0,\delta_{2}\in(0,1]
-\]
-
-\end_inset
-
- thus proving that 
-\begin_inset Formula $\dot{\widetilde{V}}(x)$
-\end_inset
-
- is semi-definite negative (
-\begin_inset Formula $x_{1}$
-\end_inset
-
- and 
-\begin_inset Formula $x_{3}$
-\end_inset
-
- could assume any value).
-\begin_inset Newline newline
-\end_inset
-
-To prove Global Asymptotic Stability, we can use LaSalle invariance criterion,
- verifying that 
-\begin_inset Formula $\left\{ 0\right\} $
-\end_inset
-
- is the largest invariant set contained in 
-\begin_inset Formula $Ker\left\{ \dot{\widetilde{V}}\right\} \coloneqq K_{0}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-But 
-\begin_inset Formula $Ker\left\{ \dot{\widetilde{V}}\right\} =\left\{ x:-x_{2}^{2}-x_{4}^{2}=0\right\} $
-\end_inset
-
- can be seen as 
-\begin_inset Formula 
-\[
--\begin{bmatrix}x_{2} & x_{4}\end{bmatrix}\begin{bmatrix}x_{2}\\
-x_{4}
-\end{bmatrix}=-\left\Vert y_{1}\right\Vert ^{2}=0
-\]
-
-\end_inset
-
-and, by the vector norm propriety, 
-\begin_inset Formula $\left\Vert y_{1}\right\Vert ^{2}=0\Leftrightarrow y_{1}=0$
-\end_inset
-
-.
- For this reason, we can work with a simplified expression 
-\begin_inset Formula $K_{0}=\left\{ \begin{bmatrix}x_{2}\\
-x_{4}
-\end{bmatrix}=\begin{bmatrix}0\\
-0
-\end{bmatrix}\right\} =\left\{ x_{2}=0\land x_{4}=0\right\} =\mathbb{R}^{2}$
-\end_inset
-
- (
-\begin_inset Formula $x_{1}x_{3}$
-\end_inset
-
- plane).
- Using Lie derivatives, it is possible to calculate: 
-\begin_inset Formula 
-\begin{align*}
-K_{1} & =\left\{ x:K_{0}\land\mathcal{L}_{f}^{1}\begin{bmatrix}x_{2}\\
-x_{4}
-\end{bmatrix}=\frac{\partial\begin{bmatrix}x_{2}\\
-x_{4}
-\end{bmatrix}}{\partial x}f(x)=0\right\} =\left\{ K_{0}\land\begin{bmatrix}0 & 1 & 0 & 0\\
-0 & 0 & 0 & 1
-\end{bmatrix}\begin{bmatrix}x_{2}\\
-\frac{-x_{2}-x_{1}-2x_{3}x_{4}x_{2}}{(x_{3}^{2}+1)}\\
-x_{4}\\
--x_{4}-x_{3}+x_{3}x_{2}^{2}
-\end{bmatrix}=0\right\} \\
- & =\left\{ K_{0}\land\begin{bmatrix}\frac{-x_{2}-x_{1}-2x_{3}x_{4}x_{2}}{(x_{3}^{2}+1)}\\
--x_{4}-x_{3}+x_{3}x_{2}^{2}
-\end{bmatrix}=0\right\} 
-\end{align*}
-
-\end_inset
-
- and using the relations found in the previous iteration, we could simplify
- the expression:
-\begin_inset Formula 
-\[
-\left\{ K_{0}\land\begin{bmatrix}\frac{-x_{1}}{(x_{3}^{2}+1)}\\
--x_{3}
-\end{bmatrix}=0\right\} =\left\{ K_{0}\land\begin{bmatrix}x_{1}\\
-x_{3}
-\end{bmatrix}=0\right\} =\left\{ x_{2}=0\land x_{4}=0\land x_{1}=0\land x_{3}=0\right\} =\left\{ 0\right\} =K_{1}
-\]
-
-\end_inset
-
-So the largest invariant set is 
-\begin_inset Formula $\Omega\subset K_{1}=\left\{ 0\right\} \Rightarrow\left\{ 0\right\} $
-\end_inset
-
- is GAS.
-\end_layout
-
-\begin_layout Section
-Simulate the system for different constant values of 
-\begin_inset Formula $r_{d}$
-\end_inset
-
- and 
-\begin_inset Formula $\theta_{d}$
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-In order to show the results achieved in a way conceptually similar to reality,
- the simulation has been carried out in Simulink.
- The built model is the following one, where:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage pagebreak
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-the System block is described by the following Matlab function:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Box Doublebox
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\begin_inset listings
-lstparams "language=Matlab,tabsize=4"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-function [xDot,y] = System(x,u)
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot=zeros(4,1); % defining size of xDot 
-\end_layout
-
-\begin_layout Plain Layout
-
-					 % (required for simulation)
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(1) = x(2);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(2) = (u(1)-2*x(3)*x(4)*x(2))/((x(3)^2)+1);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(3) = x(4);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(4) = u(2)+x(3)*(x(2)^2);
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-	y=zeros(2,1); % defining size of y
-\end_layout
-
-\begin_layout Plain Layout
-
-	y(1)=x(2); 
-\end_layout
-
-\begin_layout Plain Layout
-
-	y(2)=x(4);
-\end_layout
-
-\begin_layout Plain Layout
-
-end 
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Itemize
-the IC block allows to set a specific initial condition (in our case, it's
- sufficient to not be the origin, since it is an equilibrium).
-\end_layout
-
-\begin_layout Itemize
-the feedback loop is built from the output 
-\emph on
-y
-\emph default
- and accordingly to the equation given by the assignment.
-\end_layout
-
-\begin_layout Itemize
-the scope is attached to the state, showing that all its components converge
- to a specific value.
-\end_layout
-
-\begin_layout Standard
-Another way to describe the system is through a Matlab function that would
- be integrated through ode45:
-\end_layout
-
-\begin_layout Standard
-\begin_inset Box Doublebox
-position "t"
-hor_pos "c"
-has_inner_box 1
-inner_pos "t"
-use_parbox 0
-use_makebox 0
-width "100col%"
-special "none"
-height "1in"
-height_special "totalheight"
-thickness "0.4pt"
-separation "3pt"
-shadowsize "4pt"
-framecolor "black"
-backgroundcolor "none"
-status open
-
-\begin_layout Plain Layout
-\begin_inset listings
-lstparams "language=Matlab,tabsize=4"
-inline false
-status open
-
-\begin_layout Plain Layout
-
-function [xDot] = sys(t,x)
-\end_layout
-
-\begin_layout Plain Layout
-
-	global theta_d r_d;
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-	u(1)=-x(2)-( x(1) - theta_d );
-\end_layout
-
-\begin_layout Plain Layout
-
-	u(2)=-x(4)-( x(3) - r_d );
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(1,1) = x(2);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(2,1) = (u(1)-2*x(3)*x(4)*x(2))/((x(3)^2)+1);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(3,1) = x(4);
-\end_layout
-
-\begin_layout Plain Layout
-
-	xDot(4,1) = u(2)+x(3)*(x(2)^2);
-\end_layout
-
-\begin_layout Plain Layout
-
-end
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset VSpace defskip
-\end_inset
-
-where the global variables are set into an external script to be easily
- accessible and editable.
-\end_layout
-
-\begin_layout Standard
-he simulations - we refer to the first plot due to its smaller scale and
- better resolution -, once the 
-\begin_inset Formula $\theta_{d}$
-\end_inset
-
- and 
-\begin_inset Formula $r_{d}$
-\end_inset
-
- value are fixed and the system begins to evolve, as we can see the 
-\begin_inset Formula $x_{1}$
-\end_inset
-
- and 
-\begin_inset Formula $x_{3}$
-\end_inset
-
- components of the state ( 
-\begin_inset Formula $\theta$
-\end_inset
-
- and 
-\begin_inset Formula $r$
-\end_inset
-
- respectively) converge to the reference values, while 
-\begin_inset Formula $x_{2}$
-\end_inset
-
- and 
-\begin_inset Formula $x_{4}$
-\end_inset
-
- (that are 
-\begin_inset Formula $\dot{\theta}$
-\end_inset
-
- and 
-\begin_inset Formula $\dot{r}$
-\end_inset
-
-) reduce their amplitude towards zero as the state approaches the asymptotic
- value.
- 
-\end_layout
-
-\begin_layout Standard
-h higher reference value, the overshoot of both the components of the state
- increases, but eventually, after a long transient, the state converges
- to: 
-\begin_inset Formula 
-\[
-x_{\infty}=\begin{bmatrix}\theta_{d} & 0 & r_{d} & 0\end{bmatrix}^{T}
-\]
-
-\end_inset
-
-In conclusion, we can claim that the controller achieves 
-\emph on
-asymptotic tracking
-\emph default
- 
-\emph on
-for constant values
-\emph default
-, with the special case of 
-\begin_inset Formula $\theta_{d}=0,r_{d}=0$
-\end_inset
-
-, where the converging point is the origin.
-\end_layout
-
-\begin_layout Section
-Prove that the closed-loop system is not ISS
-\end_layout
-
-\begin_layout Subsection
-Build an appropriate input signal
-\end_layout
-
-\begin_layout Standard
-Unfortunately, this point was not really clear for me.
- Due to the hint to use the Lyapunov function and the form of 
-\begin_inset Formula $k(x(t)):\mathbb{R}^{4}\longrightarrow\mathbb{R}$
-\end_inset
-
- for the disturbance, I initially thought that the function was exactly
- 
-\begin_inset Formula $\widetilde{V}(x)$
-\end_inset
-
-, or a similar function; however, this cannot be possible, since a sign
- definite function would simple lead to a constant value tracking.
-\end_layout
-
-\begin_layout Standard
-On the other hand, since the idea is to maximize the power, we could touch
- the variables that are involved with velocity (
-\begin_inset Formula $x_{2}$
-\end_inset
-
- or 
-\begin_inset Formula $x_{4}$
-\end_inset
-
-), and since 
-\begin_inset Formula $\theta_{d}$
-\end_inset
-
-appears in 
-\begin_inset Formula $x_{2}$
-\end_inset
-
-, and according to the simulation for constant values, the best approach
- would be to invert the input signal every time the 
-\begin_inset Formula $x_{2}$
-\end_inset
-
- crosses zero.
- As we would expect, 
-\begin_inset Formula $x_{1}$
-\end_inset
-
- has an oscillatory unbounded solution (it is directly influenced by 
-\begin_inset Formula $x_{2}$
-\end_inset
-
-, so that each time the solution changes direction, it is accelerated by
- the new value of derivative).
- Moreover, the disturbance should have a rather large constant compared
- to initial condition, being the only positive term for 
-\begin_inset Formula $\dot{x_{2}}$
-\end_inset
-
-.
- 
-\end_layout
-
-\begin_layout Standard
-Another consideration could be done using the derivative of Lyapunov function
- with this specific disturbance.
- In fact, doing some calculations, for 
-\begin_inset Formula $\theta_{d}=c\cdot sign\left(k\left(x\left(t\right)\right)\right),r_{d}=0$
-\end_inset
-
-, we obtain:
-\begin_inset Formula 
-\[
-\dot{\widetilde{V}}(x,d)=-x_{2}^{2}-x_{4}^{2}+x_{2}\cdot c\cdot sign\left(k\left(x\left(t\right)\right)\right)
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-and choosing 
-\begin_inset Formula $k\left(x\left(t\right)\right)=x_{2}$
-\end_inset
-
-, we would get:
-\begin_inset Formula 
-\[
-\dot{\widetilde{V}}(x,d)=-x_{2}^{2}-x_{4}^{2}+\left|x_{2}\right|\cdot c
-\]
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-that not only is not definite negative, it is also not sign defined for
- 
-\begin_inset Formula $c>0$
-\end_inset
-
-.
- Even with some manipulations (rewriting 
-\begin_inset Formula $\dot{\widetilde{V}}(x,d)$
-\end_inset
-
- as 
-\begin_inset Formula $-\frac{x_{2}^{2}}{2}-x_{4}^{2}+\frac{\theta_{d}^{2}}{2}$
-\end_inset
-
-, or find 
-\begin_inset Formula $\chi\left(\left|\theta_{d}\right|\right)=2\left|\theta_{d}\right|=2\left|c\cdot sign\left(k\left(x\left(t\right)\right)\right)\right|=2\left|c\right|$
-\end_inset
-
-) we cannot use this Lyapunov function as an ISS one of either types; another
- proof is given by Theorem 19 on Lecture Notes.
-\end_layout
-
-\begin_layout Subsection
-Show the resulting simulation
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t3_r0_x1_orig.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t3_r0_x1_mod.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation with 
-\begin_inset Formula $\theta_{d}=3sign\left(x_{2}\right),r_{d}=0$
-\end_inset
-
- and 
-\begin_inset Formula $x_{0}=\begin{bmatrix}1 & 1 & 1 & 1\end{bmatrix}^{T}$
-\end_inset
-
-for both original and modified feedback.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-As noticeable by the figure and by their description, we have chosen the
- same exact conditions, while using different feedback, where the second
- one is the same used in the next point analysis.
- In the first one, both 
-\begin_inset Formula $x_{1}$
-\end_inset
-
- and 
-\begin_inset Formula $x_{3}$
-\end_inset
-
- are diverging and, while 
-\begin_inset Formula $x_{2}$
-\end_inset
-
- becomes somewhat the same at each cycle of its waveform, 
-\begin_inset Formula $x_{4}$
-\end_inset
-
- continues to increase its peak, pushing higher 
-\begin_inset Formula $x_{3}$
-\end_inset
-
- and consequently 
-\begin_inset Formula $x_{1}$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t100_r0_x1.pdf
-	lyxscale 50
-	width 100text%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation with 
-\begin_inset Formula $\theta_{d}=100sign\left(x_{2}\right),r_{d}=0$
-\end_inset
-
- and 
-\begin_inset Formula $x_{0}=\begin{bmatrix}1 & 1 & 1 & 1\end{bmatrix}^{T}$
-\end_inset
-
-, original feedback.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-Even for larger times, the state continues to increase, following an 
-\begin_inset Formula $\sqrt{x}$
-\end_inset
-
- form and thus being unbounded, while having a bounded input.
-\end_layout
-
-\begin_layout Section
-Show that the modified feedback fulfills the ISS properties
-\end_layout
-
-\begin_layout Standard
-With the new pair of inputs:
-\begin_inset Formula 
-\[
-u_{N}=\begin{cases}
-u_{1}=-\dot{\theta}-(\theta-\theta_{d})\\
-u_{2}=-\dot{r}-(r-r_{d})-(r^{3}-r_{d}^{3})
-\end{cases}\rightarrow\begin{cases}
-u_{1}=-x_{2}-(x_{1}-\theta_{d})\\
-u_{2}=-x_{4}-(x_{3}-r_{d})-(x_{3}^{3}-r_{d}^{3})
-\end{cases}
-\]
-
-\end_inset
-
-the state space representation becomes:
-\begin_inset Formula 
-\[
-\dot{x}=\begin{bmatrix}x_{2}\\
-\frac{-x_{2}-(x_{1}-\theta_{d})-2x_{3}x_{4}x_{2}}{(x_{3}^{2}+1)}\\
-x_{4}\\
--x_{4}-(x_{3}-r_{d})-(x_{3}^{3}-r_{d}^{3})+x_{3}x_{2}^{2}
-\end{bmatrix}
-\]
-
-\end_inset
-
-Then, doing some computations, we can show how this system fulfills the
- typical ISS properties.
-\end_layout
-
-\begin_layout Subsubsection
-Input-to-State Stable Definition
-\end_layout
-
-\begin_layout Standard
-A system is ISS if and only if:
-\begin_inset Formula 
-\[
-\left|\phi\left(t,x_{0},d\right)\right|\leq\max\left\{ \beta\left(\left|x_{0}\right|,t\right),\gamma\left(\left\Vert d\right\Vert _{\infty}\right)\right\} ,\beta\in\mathcal{KL},\gamma\in\mathcal{K}_{\infty}
-\]
-
-\end_inset
-
-Due to this definition, we have a shape in which our solution is bounded,
- and for large time, it almost solely depends on the second term.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t5_r7_x10.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t5_r7_x15.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation for 
-\begin_inset Formula $\theta_{d}=5sign\left(x_{2}\right),r_{d}=7$
-\end_inset
-
-, and 
-\begin_inset Formula $x_{0_{1}}=\begin{bmatrix}10 & 10 & 10 & 10\end{bmatrix}^{T}$
-\end_inset
-
-,
-\begin_inset Formula $x_{0_{2}}=\begin{bmatrix}15 & 15 & 15 & 15\end{bmatrix}^{T}$
-\end_inset
-
-respectively.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-As we can notice from the two figures above, when 
-\begin_inset Formula $x_{0}$
-\end_inset
-
- increases the transient does the same, while the disturbance, being the
- same, leaves the second part of the bound (given by 
-\begin_inset Formula $\gamma$
-\end_inset
-
- for large time) unaltered.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset space \hspace{}
-\length 27.5text%
-\end_inset
-
-
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t5_r11_x10.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation for 
-\begin_inset Formula $\theta_{d}=5sign\left(x_{2}\right),r_{d}=11$
-\end_inset
-
-, and 
-\begin_inset Formula $x_{0}=\begin{bmatrix}10 & 10 & 10 & 10\end{bmatrix}^{T}$
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-When the disturbance increases (only one component in our example for simplicity
- of analysis), we can note how the 
-\begin_inset Formula $\gamma$
-\end_inset
-
- part increases, leading to a steady state value bigger according to 
-\begin_inset Formula $\mathcal{K}_{\infty}$
-\end_inset
-
- function definition.
-\end_layout
-
-\begin_layout Subsubsection
-Converging-Input Converging-State (CICS)
-\end_layout
-
-\begin_layout Standard
-To prove this property, we could choose a suitable disturbance that goes
- to zero for 
-\begin_inset Formula $t\rightarrow+\infty$
-\end_inset
-
-.
- For simplicity of analysis 
-\begin_inset Formula $r_{d}$
-\end_inset
-
-is fixed to zero, while 
-\begin_inset Formula $\theta_{d}=3e^{-\frac{t}{10}}$
-\end_inset
-
-, an 
-\begin_inset Formula $\mathcal{L}$
-\end_inset
-
--type function (again, one of the simplest possible).
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset space \hspace{}
-\length 27.5text%
-\end_inset
-
-
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t3exp_r0_x1.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation for 
-\begin_inset Formula $\theta_{d}=3e^{-\frac{t}{10}},r_{d}=0$
-\end_inset
-
-, and 
-\begin_inset Formula $x_{0}=\begin{bmatrix}1 & 1 & 1 & 1\end{bmatrix}^{T}$
-\end_inset
-
-.
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-As we can notice from the figure, after a transient somewhat 
-\begin_inset Quotes eld
-\end_inset
-
-chaotic
-\begin_inset Quotes erd
-\end_inset
-
-, the system is bounded by the 
-\begin_inset Formula $\gamma$
-\end_inset
-
- part of the ISS definition, thus the solution goes down exponentially to
- zero.
-\end_layout
-
-\begin_layout Subsubsection
-0-GAS
-\end_layout
-
-\begin_layout Standard
-The Global Asymptotic Stability in absence of disturbance (
-\begin_inset Formula $d=0$
-\end_inset
-
-), means that the solution is bounded by the 
-\begin_inset Formula $\beta$
-\end_inset
-
- part of the ISS definition, an 
-\begin_inset Formula $\mathcal{L}$
-\end_inset
-
--type function that eventually goes to zero for 
-\begin_inset Formula $t\rightarrow+\infty$
-\end_inset
-
-.
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-placement H
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t0_r0_x1.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset space \hfill{}
-\end_inset
-
-
-\begin_inset Graphics
-	filename /media/filippob/2A1C83641C832A41/Users/Filippo Badalamenti/Desktop/Universita'/Imperial College/Stab&Contr of NL Systems/Courseworks/Coursework2/png/evolution_t0_r0_x10.pdf
-	lyxscale 45
-	width 45text%
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Simulation for 
-\begin_inset Formula $\theta_{d}=0,r_{d}=0$
-\end_inset
-
-, and 
-\begin_inset Formula $x_{0_{1}}=\begin{bmatrix}1 & 1 & 1 & 1\end{bmatrix}^{T}$
-\end_inset
-
-,
-\begin_inset Formula $x_{0_{2}}=\begin{bmatrix}10 & 10 & 10 & 10\end{bmatrix}^{T}$
-\end_inset
-
-respectively.
+As analysed above, due to the fact that there are 28 single states, we can
+ affirm that we are able to reconstruct the exact position of the robot,
+ that is because the map has no simmetry; in fact, once the map it is modified,
+ if we compute the same tools used before (row and column sum vectors, singular
+ values), we can see that:
 \end_layout
 
+\begin_layout Enumerate
+there are not any single value state; instead, we have 
+\begin_inset Formula $\nicefrac{\left|X\right|}{2}$
 \end_inset
-
 
-\end_layout
-
-\end_inset
 
-As we can see by the figures, the system goes to zero regardless of initial
- condition and, after an eventually long transient, it converges to the
- origin.
 \end_layout
 
 \end_body
