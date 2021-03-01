@@ -220,7 +220,7 @@ Is this case the automaton
 \begin_inset Formula $G_{R}$
 \end_inset
 
-is described by 
+ is described by 
 \begin_inset Formula $E=\left\{ r,n,s,e,w\right\} $
 \end_inset
 
@@ -274,7 +274,7 @@ status open
 
 As we can see, both requests are satisfied – keeping track of robot heading,
  ensuring that only the movement in the front-facing direction is enabled
- –.
+ – .
  Since the choice of the initial state does not matter, we choose 
 \begin_inset Formula $N$
 \end_inset
@@ -580,7 +580,7 @@ undefined & ,\;otherwise
 \begin_layout Standard
 Now, we can define a Matlab function to obtain the parallel automaton.
  Due to the length of the code involved, it will be first conceptually analysed
- through bullet points, and then presented as the whole code:
+ through the following points, and then presented as the whole code:
 \end_layout
 
 \begin_layout Enumerate
@@ -588,7 +588,7 @@ The
 \emph on
 union
 \emph default
- of the two event set is carried out; to achieve this, the entire 
+ of the two event sets is carried out; to achieve this, the entire 
 \begin_inset Formula $E_{1}$
 \end_inset
 
@@ -604,9 +604,10 @@ The
 \emph on
  cartesian product
 \emph default
- of the two set of states is done generating each possible combination and
- rearranging it in a column vector.
- Although not fully efficient, the proposed method is conceptually easier.
+ of the two sets of states is done generating each possible combination
+ and rearranging them in a column vector.
+ Although not fully efficient, the proposed method is conceptually easier
+ to be implemented.
 \end_layout
 
 \begin_layout Enumerate
@@ -628,8 +629,8 @@ if we have a private event (for
 \begin_inset Formula $E_{2}$
 \end_inset
 
-), then we check if it were an active event for that state, and if so, the
- opportune transition is computed and added to the list (taking in account
+), then we check if there were an active event for that state, and if so,
+ the opportune transition is computed and added to the list (taking in account
  that the update has to follow the new arrangement of the states).
  
 \end_layout
@@ -702,7 +703,7 @@ status open
 
 
 \backslash
-newgeometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+newgeometry{left=1.5cm, right=1.5cm, top=1cm, bottom=1.5cm}
 \end_layout
 
 \end_inset
@@ -727,7 +728,7 @@ separation "3pt"
 shadowsize "4pt"
 framecolor "black"
 backgroundcolor "none"
-status collapsed
+status open
 
 \begin_layout Plain Layout
 \noindent
@@ -1390,7 +1391,7 @@ status open
 
 
 \backslash
-newgeometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+newgeometry{left=1.5cm, right=1.5cm, top=1cm, bottom=1.5cm}
 \end_layout
 
 \end_inset
@@ -1726,7 +1727,12 @@ for i=1:length(trans_f)
 
 \begin_layout Plain Layout
 
-         [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'r')] ];
+         [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'r')]
+\end_layout
+
+\begin_layout Plain Layout
+
+			  ];
 \end_layout
 
 \begin_layout Plain Layout
@@ -1909,7 +1915,7 @@ status open
 
 
 \backslash
-newgeometry{left=1.5cm, right=1.5cm, top=1.5cm, bottom=1.5cm}
+newgeometry{left=1.5cm, right=1.5cm, top=1cm, bottom=1.5cm}
 \end_layout
 
 \end_inset
@@ -1947,7 +1953,6 @@ status open
 
 \begin_layout Plain Layout
 
-\size tiny
 function G_out = observer(G_in) 
 \end_layout
 
@@ -1957,44 +1962,37 @@ function G_out = observer(G_in)
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out = struct("E",0, "X",0, "f",0, "x0",0);
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % we have to first convert the event and transitions lists
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_in = convert2parobs(G_in); 
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out.E = G_in.E;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % as suggested the whole initial state is given by the vector of all ones
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % notice that the state will be expressed as a row, so that the "vector"
  of
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % states will always be a column vector.
  
 \end_layout
@@ -2005,25 +2003,21 @@ G_out.E = G_in.E;
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out.f = {};
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out.x0 = ones(1,height(G_in.X));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out.X = G_out.x0; % the first defined state
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 x_new = G_out.x0;
 \end_layout
 
@@ -2033,19 +2027,16 @@ x_new = G_out.x0;
 
 \begin_layout Plain Layout
 
-\size tiny
 while height(x_new) > 0
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	x_til = x_new(1,:); % take the first state,
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
     x_new(1,:) = [];   % and remove it from the queue of states
 \end_layout
 
@@ -2055,25 +2046,21 @@ while height(x_new) > 0
 
 \begin_layout Plain Layout
 
-\size tiny
 		for e = 1:length(G_in.E) % compute the reachability
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			state_index = find (G_in.f(:,3) == e);  % find all the states with
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 													% the active event 'e'
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			x_next = zeros(1,height(G_in.X));
 \end_layout
 
@@ -2083,73 +2070,61 @@ while height(x_new) > 0
 
 \begin_layout Plain Layout
 
-\size tiny
 			for x = 1:length(state_index)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 				x_tmp = G_in.f(state_index(x),1); % starting x state
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 				if (x_til(x_tmp) == 1)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
                 	% if the Gamma is referred to a state we're considering
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
                 	x_next(G_in.f(state_index(x),2)) = 1;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 					% then we consider the f(x,e) as a valid transition
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
             	end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			% once found the new state
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			if any(x_next) % if it is a valid state
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 				% we define the transition map
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 				G_out.f(end+1,:) = {x_til, x_next, e};
 \end_layout
 
@@ -2159,55 +2134,46 @@ while height(x_new) > 0
 
 \begin_layout Plain Layout
 
-\size tiny
-				if ~ismember(x_next, G_out.X,'rows)	 % if the state does not
+				if ~ismember(x_next, G_out.X,'rows')	% if the state does not
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 														% exist yet
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
                 G_out.X = [G_out.X; x_next];	% add it to the list
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 												% of all states
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
                 x_new = [x_new; x_next];     % add at the end of the queue
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 			end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 		end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
@@ -2217,13 +2183,11 @@ end
 
 \begin_layout Plain Layout
 
-\size tiny
 % implement transitions, based on the order of the new states 
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 f_tmp = zeros(height(G_out.f),width(G_out.f));
 \end_layout
 
@@ -2233,37 +2197,31 @@ f_tmp = zeros(height(G_out.f),width(G_out.f));
 
 \begin_layout Plain Layout
 
-\size tiny
 for h=1:height(G_out.f)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	f_tmp(h,1) = find (ismember(G_out.X, cell2mat(G_out.f(h,1)),'rows'));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	f_tmp(h,2) = find (ismember(G_out.X, cell2mat(G_out.f(h,2)),'rows'));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
     f_tmp(h,3) = cell2mat(G_out.f(h,3));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_out.f = f_tmp;
 \end_layout
 
@@ -2273,7 +2231,6 @@ G_out.f = f_tmp;
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
@@ -2287,19 +2244,16 @@ end
 
 \begin_layout Plain Layout
 
-\size tiny
 function G_po = convert2parobs(G)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % In this sub-function, we convert the list of event and transition to the
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 % one that we can really observe ('m' and 'r').
 \end_layout
 
@@ -2309,19 +2263,16 @@ function G_po = convert2parobs(G)
 
 \begin_layout Plain Layout
 
-\size tiny
 G_po = G;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 new_e = ['m','r']';
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 G_po.E = new_e;
 \end_layout
 
@@ -2331,43 +2282,36 @@ G_po.E = new_e;
 
 \begin_layout Plain Layout
 
-\size tiny
 % now, we determine the position of events to be substituted
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 e2remove = ['n','s','e','w']';
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 e_index = zeros(4,1);
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 for e=1:length(e2remove)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	e_index(e) = find( G.E == e2remove(e));
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 r_old = find( G.E == 'r');
 \end_layout
 
@@ -2377,49 +2321,41 @@ r_old = find( G.E == 'r');
 
 \begin_layout Plain Layout
 
-\size tiny
 % finally, change the indexes of events
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 for i=1:height(G.f)
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 	if ( ismember(G.f(i,3),e_index) )
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
         G_po.f(i,3) = 1;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
     elseif ( ismember(G.f(i,3),r_old) )
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
         G_po.f(i,3) = 2;
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
     end
 \end_layout
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
@@ -2429,7 +2365,6 @@ end
 
 \begin_layout Plain Layout
 
-\size tiny
 end
 \end_layout
 
@@ -2455,13 +2390,6 @@ status open
 restoregeometry
 \end_layout
 
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-\begin_inset Newpage pagebreak
 \end_inset
 
 
@@ -2591,14 +2519,14 @@ rows
 \emph default
  vector, we know for each state how many of them have precise information
  about robot position and heading; as we can see, there are 28 ones in this
- vector, that means that, after an appropriate word happens, it is possible
+ vector, that means that if an appropriate word happens, it is possible
  to end up in a deterministic state (it is obvious that just spinning would
  not improve our knowledge on position).
 \end_layout
 
 \begin_layout Standard
 It is important to notice that both results will be different from the ones
- obtained in the nex point of the coursework.
+ obtained in the next point of the coursework.
 \end_layout
 
 \begin_layout Standard
@@ -2717,7 +2645,7 @@ has_inner_box 1
 inner_pos "t"
 use_parbox 0
 use_makebox 0
-width "100col%"
+width "100text%"
 special "none"
 height "1in"
 height_special "totalheight"
@@ -2887,8 +2815,9 @@ In this way, we can compute where we could possibly end up.
 \begin_inset Formula $w="mrrmrmrrmrm"$
 \end_inset
 
-–that means only one 1 is present in the row state vector of the observer–,
- we can match it in the parallel automaton, and the resulting state is 
+– that means only one 1 is present in the row state vector of the observer
+ –, we can match it in the parallel automaton, and the resulting state is
+ 
 \begin_inset Formula $x=f\left(x_{0},w\right)="Rm2N"$
 \end_inset
 
