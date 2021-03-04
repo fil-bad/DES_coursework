@@ -66,7 +66,7 @@ for i=1:length(trans_f)
     offset = find(contains(add_state, G_out.X(G_out.f(trans_f(i),1))));
     
     G_out.f = [G_out.f; 
-        [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'r')] ];
+        [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'm')] ];
         
 end
 

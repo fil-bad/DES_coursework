@@ -1727,7 +1727,7 @@ for i=1:length(trans_f)
 
 \begin_layout Plain Layout
 
-         [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'r')]
+         [orig_length+offset G_out.f(trans_f(i),2) find(G_out.E == 'm')]
 \end_layout
 
 \begin_layout Plain Layout
@@ -1852,18 +1852,18 @@ r
 33 & 33 & 2\\
 34 & 34 & 2\\
 35 & 35 & 2\\
-29 & 16 & 2\\
-30 & 10 & 2\\
-30 & 22 & 2\\
-31 & 2 & 2\\
-31 & 11 & 2\\
-31 & 21 & 2\\
-32 & 3 & 2\\
-32 & 12 & 2\\
-33 & 4 & 2\\
-33 & 27 & 2\\
-34 & 19 & 2\\
-35 & 24 & 2
+29 & 16 & 1\\
+30 & 10 & 1\\
+30 & 22 & 1\\
+31 & 2 & 1\\
+31 & 11 & 1\\
+31 & 21 & 1\\
+32 & 3 & 1\\
+32 & 12 & 1\\
+33 & 4 & 1\\
+33 & 27 & 1\\
+34 & 19 & 1\\
+35 & 24 & 1
 \end{array}\right)\end{array}
 \]
 
